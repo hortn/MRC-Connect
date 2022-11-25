@@ -1,0 +1,131 @@
+﻿
+$formDWMRCConnect_Load={
+	
+}
+
+
+$combobox_PcName_TextChanged = {
+	
+	If ($combobox_PcName.Text -ne '')
+	{
+		$buttonConnect.Enabled = $true
+	}
+	else
+	{
+		$buttonConnect.Enabled = $false
+	}
+}
+
+
+
+$combobox_PcName_KeyUp = [System.Windows.Forms.KeyEventHandler]{
+	if ($_.KeyCode -eq 'Enter')
+	{
+		&$buttonConnect_Click
+	}
+}
+
+
+
+
+
+$checkbox_vnc_CheckedChanged = {
+	if ($checkbox_vnc.CheckState -eq 'Checked')
+	{
+		$checkbox_tsd.Enabled = $false
+		$checkbox_vnc_andr.Enabled = $false
+	}
+	Else
+	{
+		$checkbox_tsd.Enabled = $true
+		$checkbox_vnc_andr.Enabled = $true
+	}
+}
+
+
+
+
+$checkbox_tsd_CheckedChanged = {
+	if ($checkbox_tsd.CheckState -eq 'Checked')
+	{
+		$checkbox_vnc.Enabled = $false
+		$checkbox_vnc_andr.Enabled = $false
+	}
+	Else
+	{
+		$checkbox_vnc.Enabled = $true
+		$checkbox_vnc_andr.Enabled = $true
+	}
+}
+
+
+$checkbox_vnc_andr_CheckedChanged = {
+	if ($checkbox_vnc_andr.CheckState -eq 'Checked')
+	{
+		$checkbox_tsd.Enabled = $false
+		$checkbox_vnc.Enabled = $false
+	}
+	Else
+	{
+		$checkbox_tsd.Enabled = $true
+		$checkbox_vnc.Enabled = $true
+	}
+	
+}
+
+
+$buttonConnect_Click={
+	
+	If ($combobox_PcName.Text -notlike "* *")
+	{
+		If ([array]$Global:History -notcontains $combobox_PcName.Text)
+		{
+			[array]$Global:History += $combobox_PcName.Text
+		}
+		
+		Update-ComboBox -ComboBox $combobox_PcName  $History
+		
+		if ($checkbox_vnc.CheckState -eq 'Checked')
+		{
+			$VncCheck = '-vnc: -p:vnc_pass_here'
+		}
+		ElseIf ($checkbox_tsd.CheckState -eq 'Checked')
+		{
+			$VncCheck = '-vnc: -p:tsd_pass_here'
+		}
+		ElseIf ($checkbox_vnc_andr.CheckState -eq 'Checked')
+		{
+			$VncCheck = '-vnc: -p:tsd_android_pass_here'
+		}
+		
+		Else
+		{
+			$VncCheck = ''
+		}
+		
+		
+		
+		if ($combobox_PcName.SelectedItem -ne $null)
+		{
+			$selectedHost = $combobox_PcName.SelectedItem
+		}
+		Else
+		{
+			$selectedHost = $combobox_PcName.Text
+		}
+		connect -PC_Name $selectedHost -Vnc "$VncCheck"
+	
+	}
+	Else
+	{
+		[System.Windows.Forms.MessageBox]::Show(" Имя хоста не может содержать пробел!!!(наверное) ", 'Хоба! Ворнинг! Атенсион! Ахтунг!', 'OK', 'error')
+	}
+}
+
+$buttonRunDWRCC_Click={
+	Start-Process -FilePath "C:\Program Files (x86)\SolarWinds\Dameware Remote Support\dwrcc.exe"
+}
+
+$button_RunRS_Click={
+	Start-Process -FilePath "C:\Program Files (x86)\SolarWinds\Dameware Remote Support\DNTU.exe"
+}
